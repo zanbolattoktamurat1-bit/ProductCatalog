@@ -1,0 +1,93 @@
+@model IEnumerable<ProductCatalog.Models.Product>
+
+@{
+    var categories = ViewBag.Categories as IEnumerable<string> ?? Enumerable.Empty<string>();
+    var selectedCategory = ViewBag.SelectedCategory as string;
+    var search = ViewBag.Search as string;
+}
+
+<section class="catalog-hero">
+    <div class="container catalog-hero-content">
+        <div class="hero-copy">
+            <span class="eyebrow">@ViewData["Title"]</span>
+            <h1>@ViewBag.CatalogTitle</h1>
+            <p>Күнделікті өміріңізге арналған заманауи техника мен пайдалы құрылғылар.</p>
+            <a class="btn btn-hero" asp-controller="Product" asp-action="Create">Жаңа тауар қосу <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="hero-decoration" aria-hidden="true">
+            <span class="hero-circle circle-large"></span>
+            <span class="hero-circle circle-small"></span>
+            <span class="hero-spark">✦</span>
+        </div>
+    </div>
+    <div class="hero-bottom-line"></div>
+</section>
+
+<section class="container catalog-section">
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="status">
+            @successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Жабу"></button>
+        </div>
+    }
+
+    <div class="section-heading">
+        <div>
+            <span class="eyebrow eyebrow-dark">ӨЗІҢІЗГЕ ҚАЖЕТТІСІН ТАБЫҢЫЗ</span>
+            <h2>Біздің тауарлар</h2>
+        </div>
+        <span class="product-count">Тауар саны: <strong>@Model.Count()</strong></span>
+    </div>
+
+    <form asp-controller="Product" asp-action="Index" method="get" class="catalog-filters">
+        <label class="search-box">
+            <span class="visually-hidden">Тауар атауы бойынша іздеу</span>
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input class="form-control" type="search" name="search" value="@search" placeholder="Тауарды іздеу..." />
+        </label>
+        <label class="filter-label">
+            <span class="visually-hidden">Категория бойынша сүзу</span>
+            <select class="form-select" name="category">
+                <option value="">Барлық категория</option>
+                @foreach (var category in categories)
+                {
+                    if (category == selectedCategory)
+                    {
+                        <option value="@category" selected>@category</option>
+                    }
+                    else
+                    {
+                        <option value="@category">@category</option>
+                    }
+                }
+            </select>
+        </label>
+        <button class="btn btn-filter" type="submit">Іздеу</button>
+        @if (!string.IsNullOrWhiteSpace(search) || !string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            <a class="btn btn-clear-filter" asp-controller="Product" asp-action="Index">Тазарту</a>
+        }
+    </form>
+
+    @if (Model.Any())
+    {
+        <div class="row g-4 product-grid">
+            @foreach (var product in Model)
+            {
+                <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+                    <partial name="_ProductCard" model="product" />
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <span class="empty-icon" aria-hidden="true">⌕</span>
+            <h3>Тауар табылмады</h3>
+            <p>Іздеу сөзін өзгертіп немесе басқа категорияны таңдап көріңіз.</p>
+            <a class="btn btn-filter" asp-controller="Product" asp-action="Index">Каталогқа оралу</a>
+        </div>
+    }
+</section>
